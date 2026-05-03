@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>資格適性診断 — あなたに取りやすい資格は？</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e10;
+    --surface: #18181c;
+    --card: #1e1e24;
+    --border: #2e2e38;
+    --accent: #c8ff3e;
+    --accent2: #ff6b35;
+    --text: #f0f0f0;
+    --muted: #888;
+    --radius: 16px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 80px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(200,255,62,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -150px; right: -150px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(255,107,53,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 48px 0 40px;
+    animation: fadeUp 0.7s ease both;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 4px 14px;
+    border-radius: 999px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 8vw, 52px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .hero h1 span { color: var(--accent); font-style: italic; }
+  .hero-sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 16px;
+    line-height: 1.7;
+  }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    background: var(--border);
+    border-radius: 999px;
+    height: 4px;
+    margin-bottom: 32px;
+    overflow: hidden;
+    display: none;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .progress-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: right;
+    margin-bottom: 8px;
+    display: none;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .q-number {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .q-text {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .option-btn {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s ease;
+    line-height: 1.5;
+  }
+  .option-btn:hover {
+    border-color: var(--accent);
+    background: rgba(200,255,62,0.06);
+    transform: translateX(4px);
+  }
+  .option-btn.selected {
+    border-color: var(--accent);
+    background: rgba(200,255,62,0.1);
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* START BTN */
+  .start-btn {
+    display: block;
+    width: 100%;
+    margin-top: 32px;
+    padding: 18px;
+    background: var(--accent);
+    color: #000;
+    font-size: 16px;
+    font-weight: 900;
+    font-family: 'Noto Sans JP', sans-serif;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: all 0.2s ease;
+  }
+  .start-btn:hover { background: #d4ff55; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,255,62,0.25); }
+  .start-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* RESULT */
+  .result-wrap { animation: fadeUp 0.6s ease both; }
+
+  .result-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .result-header .label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .result-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(24px, 6vw, 36px);
+    line-height: 1.2;
+  }
+  .result-header h2 span { color: var(--accent); }
+
+  .result-cards { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    animation: fadeUp 0.5s ease both;
+  }
+  .result-card:nth-child(1) { animation-delay: 0.05s; border-color: var(--accent); }
+  .result-card:nth-child(2) { animation-delay: 0.15s; }
+  .result-card:nth-child(3) { animation-delay: 0.25s; }
+
+  .rank-badge {
+    flex-shrink: 0;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 900;
+  }
+  .rank-1 { background: var(--accent); color: #000; }
+  .rank-2 { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .rank-3 { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+
+  .result-info h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+  .result-info .diff {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+  }
+  .diff-easy { background: rgba(200,255,62,0.15); color: var(--accent); }
+  .diff-mid { background: rgba(255,107,53,0.15); color: var(--accent2); }
+  .diff-hard { background: rgba(255,255,255,0.08); color: var(--muted); }
+  .result-info p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  .share-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: #000;
+    border: 1.5px solid var(--text);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: all 0.2s ease;
+    margin-bottom: 12px;
+  }
+  .share-btn:hover { background: var(--text); color: #000; }
+
+  .retry-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+    font-size: 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .retry-btn:hover { border-color: var(--muted); color: var(--text); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero" id="hero">
+    <div class="hero-badge">無料診断</div>
+    <h1>あなたに<br><span>取りやすい</span><br>資格は？</h1>
+    <p class="hero-sub">今のスペックと状況から、<br>リアルに取れる資格をランキングで提案します。</p>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-label" id="progressLabel">1 / 10</div>
+  <div class="progress-bar-wrap" id="progressWrap">
+    <div class="progress-bar-fill" id="progressFill" style="width:10%"></div>
+  </div>
+
+  <!-- QUIZ CARD -->
+  <div class="card" id="quizCard">
+    <div class="q-number" id="qNumber">Q1</div>
+    <div class="q-text" id="qText">読み込み中...</div>
+    <div class="options" id="options"></div>
+    <button class="start-btn" id="nextBtn" disabled onclick="nextQuestion()">次へ →</button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-wrap hidden" id="resultWrap">
+    <div class="result-header">
+      <div class="label">あなたにおすすめの資格</div>
+      <h2 id="resultTitle">結果を計算中...</h2>
+    </div>
+    <div class="result-cards" id="resultCards"></div>
+    <button class="share-btn" onclick="shareResult()">🐦 Xでシェアする</button>
+    <button class="retry-btn" onclick="restart()">もう一度診断する</button>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    text: "今の学歴・最終学歴は？",
+    options: ["高校生・高卒", "大学生・大卒（文系）", "大学生・大卒（理系）", "専門・短大卒"],
+    key: "edu"
+  },
+  {
+    text: "1日に勉強できる時間はどのくらい？",
+    options: ["ほぼ無理（30分以下）", "1時間くらい", "2〜3時間", "4時間以上いける"],
+    key: "time"
+  },
+  {
+    text: "今持ってる資格は？（一番レベルの高いもの）",
+    options: ["なし / 普通免許のみ", "英検3級〜準2級 / 基本情報など", "英検2級 / 簿記3級など", "TOEIC600〜 / 簿記2級など"],
+    key: "existing"
+  },
+  {
+    text: "勉強スタイルはどっち派？",
+    options: ["テキスト・参考書で独学", "動画・YouTube で学ぶ", "予備校・通信講座を使う", "過去問ひたすら回す"],
+    key: "style"
+  },
+  {
+    text: "資格を取る目的は？",
+    options: ["就活・転職で有利にしたい", "給料アップ・昇進を狙いたい", "副業・フリーランスに活かしたい", "なんとなく自信をつけたい"],
+    key: "goal"
+  },
+  {
+    text: "英語はどのくらい得意？",
+    options: ["苦手・ほぼできない", "中学レベルならなんとか", "高校英語は普通に読める", "わりと得意・好き"],
+    key: "english"
+  },
+  {
+    text: "PCやデジタルツールは使いこなせる？",
+    options: ["Excelも怪しい", "基本的な操作はできる", "Excel・Word は問題なし", "プログラミングも少しわかる"],
+    key: "pc"
+  },
+  {
+    text: "お金や数字に対して得意・好き？",
+    options: ["苦手 / 計算が嫌い", "普通、特に好きでも嫌いでもない", "わりと得意・好き", "会計・ファイナンスに興味ある"],
+    key: "math"
+  },
+  {
+    text: "資格の勉強にかけられる期間は？",
+    options: ["1ヶ月以内に結果が欲しい", "3ヶ月くらいなら頑張れる", "半年くらいかけてじっくり", "1年以上かけても取りたい"],
+    key: "period"
+  },
+  {
+    text: "将来的に就きたい・気になる分野は？",
+    options: ["ビジネス・営業・マーケ系", "事務・経理・バックオフィス系", "IT・Web・エンジニア系", "どれでもOK、とにかく武器が欲しい"],
+    key: "field"
+  }
+];
+
+const qualifications = [
+  {
+    id: "mos",
+    name: "MOS（Microsoft Office Specialist）",
+    difficulty: "easy",
+    diffLabel: "★ 取りやすい",
+    desc: "ExcelやWordの操作スキルを証明できる資格。勉強期間1〜2ヶ月が目安で、就活での即効性が高い。事務・バックオフィス志望には特に有効。",
+    scores: { edu: [1,1,0,1], time: [1,1,0,0], english: [1,1,0,0], math: [1,1,0,0], pc: [0,1,1,0], field: [1,1,0,1], period: [1,0,0,0], goal: [1,0,0,1] }
+  },
+  {
+    id: "boki3",
+    name: "簿記3級",
+    difficulty: "easy",
+    diffLabel: "★ 取りやすい",
+    desc: "会計・経理の基礎を学べる定番資格。勉強期間は2〜3ヶ月程度。数字が苦手でも合格できるレベルで、文系就活生に特に人気。",
+    scores: { math: [0,1,1,1], field: [0,1,0,1], time: [1,1,1,0], period: [0,1,0,0], edu: [1,1,0,1], goal: [1,1,0,1] }
+  },
+  {
+    id: "fp3",
+    name: "FP（ファイナンシャルプランナー）3級",
+    difficulty: "easy",
+    diffLabel: "★ 取りやすい",
+    desc: "お金・保険・税金の知識が身につく資格。独学で2〜3ヶ月が目安。金融・保険業界の就活や、副業・資産形成にも活きる。",
+    scores: { math: [0,0,1,1], field: [1,0,0,1], goal: [1,1,1,0], period: [0,1,0,0], english: [1,1,0,0], time: [1,1,0,0] }
+  },
+  {
+    id: "toeic",
+    name: "TOEIC（目標スコア600〜730）",
+    difficulty: "mid",
+    diffLabel: "★★ 標準レベル",
+    desc: "就活での英語力証明として最もメジャー。文系総合職・外資系・商社志望には必須級。英語が好きなら最優先で狙う価値あり。",
+    scores: { english: [0,0,1,1], goal: [1,0,0,1], edu: [0,1,0,0], field: [1,0,0,1], period: [0,0,1,0], time: [0,0,1,1] }
+  },
+  {
+    id: "itpass",
+    name: "ITパスポート",
+    difficulty: "easy",
+    diffLabel: "★ 取りやすい",
+    desc: "ITの基礎知識を証明できる国家資格。技術職でなくてもIT系企業志望なら高評価。勉強期間1〜2ヶ月で取れる難易度。",
+    scores: { pc: [0,1,1,1], field: [0,0,1,1], goal: [1,0,0,1], edu: [0,1,1,0], period: [1,1,0,0], time: [1,1,0,0] }
+  },
+  {
+    id: "boki2",
+    name: "簿記2級",
+    difficulty: "mid",
+    diffLabel: "★★ 標準レベル",
+    desc: "経理・会計職志望なら評価が大きく上がる資格。3級取得後の次のステップとして最適。勉強期間3〜6ヶ月が目安。",
+    scores: { math: [0,0,1,1], field: [0,1,0,1], time: [0,1,1,1], period: [0,0,1,1], existing: [0,0,1,1], goal: [0,1,1,0] }
+  },
+  {
+    id: "kihon",
+    name: "基本情報技術者試験（FE）",
+    difficulty: "hard",
+    diffLabel: "★★★ やや難しめ",
+    desc: "IT系就職・転職で強力な武器になる国家資格。理系や本気でIT業界を目指す人向け。勉強期間3〜6ヶ月必要。",
+    scores: { pc: [0,0,1,1], field: [0,0,1,1], time: [0,0,1,1], period: [0,0,1,1], edu: [0,0,1,0], math: [0,0,1,1] }
+  },
+  {
+    id: "webken",
+    name: "Webデザイン技能検定（3級）",
+    difficulty: "easy",
+    diffLabel: "★ 取りやすい",
+    desc: "Web・クリエイティブ業界へのアピールに使える資格。デザインやWebに興味がある人向け。独学1〜2ヶ月で合格可能。",
+    scores: { field: [1,0,1,1], goal: [0,0,1,1], pc: [0,1,1,1], period: [1,1,0,0], style: [1,1,0,0] }
+  }
+];
+
+let answers = {};
+let currentQ = 0;
+let selectedOption = null;
+let resultData = [];
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('qNumber').textContent = `Q${currentQ + 1}`;
+  document.getElementById('qText').textContent = q.text;
+  const optionsEl = document.getElementById('options');
+  optionsEl.innerHTML = '';
+  selectedOption = null;
+  document.getElementById('nextBtn').disabled = true;
+  document.getElementById('nextBtn').textContent = currentQ === questions.length - 1 ? '結果を見る 🎯' : '次へ →';
+
+  const progress = ((currentQ + 1) / questions.length) * 100;
+  document.getElementById('progressFill').style.width = progress + '%';
+  document.getElementById('progressLabel').textContent = `${currentQ + 1} / ${questions.length}`;
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.onclick = () => selectOption(i, btn, q.key);
+    optionsEl.appendChild(btn);
+  });
+}
+
+function selectOption(index, btn, key) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedOption = index;
+  answers[key] = index;
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextQuestion() {
+  if (selectedOption === null) return;
+  currentQ++;
+  if (currentQ < questions.length) {
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function scoreQualifications() {
+  return qualifications.map(q => {
+    let score = 0;
+    for (const [key, weights] of Object.entries(q.scores)) {
+      const ans = answers[key];
+      if (ans !== undefined && weights[ans] !== undefined) {
+        score += weights[ans];
+      }
+    }
+    return { ...q, score };
+  }).sort((a, b) => b.score - a.score).slice(0, 3);
+}
+
+function showResult() {
+  document.getElementById('quizCard').classList.add('hidden');
+  document.getElementById('progressWrap').style.display = 'none';
+  document.getElementById('progressLabel').style.display = 'none';
+  document.getElementById('hero').classList.add('hidden');
+
+  resultData = scoreQualifications();
+
+  document.getElementById('resultTitle').innerHTML = `おすすめ資格 <span>TOP 3</span>`;
+
+  const cards = document.getElementById('resultCards');
+  cards.innerHTML = '';
+  resultData.forEach((q, i) => {
+    const diffClass = q.difficulty === 'easy' ? 'diff-easy' : q.difficulty === 'mid' ? 'diff-mid' : 'diff-hard';
+    cards.innerHTML += `
+      <div class="result-card">
+        <div class="rank-badge rank-${i+1}">${i+1}</div>
+        <div class="result-info">
+          <h3>${q.name}</h3>
+          <span class="diff ${diffClass}">${q.diffLabel}</span>
+          <p>${q.desc}</p>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('resultWrap').classList.remove('hidden');
+}
+
+function shareResult() {
+  const top = resultData[0]?.name || '';
+  const text = `【資格適性診断】\n私におすすめの資格No.1は「${top}」でした！\n\nあなたも試してみて👇\n`;
+  const url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text);
+  window.open(url, '_blank');
+}
+
+function restart() {
+  answers = {};
+  currentQ = 0;
+  selectedOption = null;
+  resultData = [];
+  document.getElementById('resultWrap').classList.add('hidden');
+  document.getElementById('quizCard').classList.remove('hidden');
+  document.getElementById('hero').classList.remove('hidden');
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('progressLabel').style.display = 'block';
+  renderQuestion();
+}
+
+// INIT
+document.getElementById('progressWrap').style.display = 'block';
+document.getElementById('progressLabel').style.display = 'block';
+renderQuestion();
+</script>
+</body>
+</html>
